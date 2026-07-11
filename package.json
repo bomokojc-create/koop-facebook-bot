@@ -1,0 +1,1 @@
+{"name":"koop-facebook-bot","version":"1.0.0","description":"Free Vercel-hosted Facebook Messenger chatbot for KOOP","main":"api/webhook.js","scripts":{"dev":"vercel dev","test":"jest --coverage"},"dependencies":{},"devDependencies":{"jest":"^29.7.0"},"engines":{"node":">=18"}}
