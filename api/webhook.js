@@ -7,43 +7,47 @@
 const VERIFY_TOKEN = process.env.VERIFY_TOKEN || 'koop_verify_token_2026';
 const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
 
-// ─── Menu Options ────────────────────────────────────────────────────────────
+// ─── Menu Options ───────────────────────────────────────────────────────────────────
 
-const MENU_TEXT = `👋 Bienvenue chez *KOOP - Global Remote Talent Solution* !\n\nChoisissez une option :\n\n1️⃣ Chaîne — Rejoindre notre chaîne\n2️⃣ Infos — En savoir plus sur KOOP\n3️⃣ Emploi — Offres d'emploi disponibles\n4️⃣ Formation — Formations & certifications\n5️⃣ Message particulier — Parler à un conseiller`;
+const MENU_TEXT = `Bonjour ! Bienvenue chez KOOP Market. Comment pouvons-nous vous aider aujourd'hui ?\n\n1. 📢 Chaîne WhatsApp : Rejoindre notre communauté\n2. ℹ️ Infos : En savoir plus sur KOOP Market\n3. 💼 Emploi : Besoin d'un travail ?\n4. 🎓 Formation : Découvrir nos programmes\n5. 🛒 Boutique : Accéder à la boutique KOOP\n6. ✉️ Message particulier : Parler à un conseiller`;
 
 const RESPONSES = {
   '1': {
-    text: `📡 *Chaîne KOOP*\n\nRejoignez notre chaîne pour recevoir les dernières offres et opportunités en temps réel :\n\n🔗 https://whatsapp.com/channel/0029Vb0VPbdJ3jUMIethzb0R\n\nTapez "menu" pour revenir au menu principal.`
+    text: `Cliquez ici pour rejoindre la chaîne WhatsApp KOOP Market : https://whatsapp.com/channel/0029Vb7vn4J8fewxV924lW1p`
   },
   '2': {
-    text: `ℹ️ *À propos de KOOP*\n\nKOOP - Global Remote Talent Solution est une plateforme qui connecte les talents africains et internationaux aux opportunités de travail à distance.\n\n🌍 100% Remote\n💼 Emplois vérifiés\n📚 Formations certifiantes\n🤝 Accompagnement personnalisé\n\nTapez "menu" pour revenir au menu principal.`
+    text: `Visitez notre site officiel pour tout savoir sur nous : https://koop-market.com`
   },
   '3': {
-    text: `💼 *Offres d'emploi*\n\nVoici nos catégories d'emploi disponibles :\n\n• Data & Analytics\n• Développement Web/Mobile\n• Marketing Digital\n• Service Client\n• Rédaction & Traduction\n• Administration\n\n📩 Envoyez votre CV à : kerryllmusungu@gmail.com\n\nTapez "menu" pour revenir au menu principal.`
+    text: `KOOP Market est une plateforme qui partage des opportunités pour vous aider dans votre recherche. Nous n'engageons pas directement, mais nous centralisons les meilleures offres vérifiées pour vous. Pour voir les offres disponibles, rejoignez notre chaîne WhatsApp (Option 1) ou visitez : https://koop-market.com/#/jobs`
   },
   '4': {
-    text: `📚 *Formations & Certifications*\n\nNos formations disponibles :\n\n• Machine Learning & IA\n• Data Science avec Python/PySpark\n• Développement Full-Stack\n• Marketing Digital\n• Gestion de projet (PMP, Agile)\n\n💰 Bourses disponibles pour les membres actifs.\n\nTapez "menu" pour revenir au menu principal.`
+    text: `Découvrez nos formations et certifications : https://koop-market.com/#/services/training`
   },
   '5': {
-    text: `✉️ *Message particulier*\n\nVotre message sera transmis à un conseiller KOOP. Veuillez décrire votre demande et nous vous répondrons dans les plus brefs délais.\n\n📧 Ou écrivez directement à : kerryllmusungu@gmail.com\n\nTapez "menu" pour revenir au menu principal.`
+    text: `Accédez à la boutique KOOP pour voir nos articles et services : https://koop-market.com/#/koop`
+  },
+  '6': {
+    text: `Votre message sera transmis à un conseiller KOOP Market. Veuillez décrire votre demande ci-dessous ou écrivez directement à : coop@amino.com`
   }
 };
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
+// ─── Helpers ───────────────────────────────────────────────────────────────────────
 
 function parseChoice(text) {
   const trimmed = text.trim().toLowerCase();
   
   // Direct number match
-  if (['1', '2', '3', '4', '5'].includes(trimmed)) return trimmed;
+  if (['1', '2', '3', '4', '5', '6'].includes(trimmed)) return trimmed;
   
   // Keyword matching
   const keywords = {
-    'chaine': '1', 'chaîne': '1', 'chain': '1',
+    'chaine': '1', 'chaîne': '1', 'chain': '1', 'whatsapp': '1', 'communauté': '1', 'communaute': '1',
     'infos': '2', 'info': '2', 'about': '2',
     'emploi': '3', 'job': '3', 'jobs': '3', 'travail': '3',
     'formation': '4', 'training': '4', 'cours': '4', 'course': '4',
-    'message': '5', 'conseiller': '5', 'contact': '5', 'help': '5'
+    'boutique': '5', 'shop': '5', 'magasin': '5',
+    'message': '6', 'conseiller': '6', 'contact': '6', 'help': '6'
   };
   
   for (const [keyword, choice] of Object.entries(keywords)) {
@@ -86,7 +90,7 @@ async function handleMessage(senderId, messageText) {
   if (choice && RESPONSES[choice]) {
     await sendMessage(senderId, RESPONSES[choice].text);
   } else {
-    await sendMessage(senderId, `Message recu ! Un conseiller KOOP vous repondra bientot.\n\nTapez "menu" pour voir les options disponibles.`);
+    await sendMessage(senderId, `Message reçu ! Un conseiller KOOP Market vous répondra bientôt.\n\nTapez "menu" pour voir les options disponibles.`);
   }
 }
 
