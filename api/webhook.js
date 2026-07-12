@@ -7,7 +7,7 @@
 const VERIFY_TOKEN = process.env.VERIFY_TOKEN || 'koop_verify_token_2026';
 const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
 
-// ─── Menu Options ───────────────────────────────────────────────────────────────────
+// ─── Menu Options ────────────────────────────────────────────────────────────────────
 
 const MENU_TEXT = `Bonjour ! Bienvenue chez KOOP Market. Comment pouvons-nous vous aider aujourd'hui ?\n\n1. 📢 Chaîne WhatsApp : Rejoindre notre communauté\n2. ℹ️ Infos : En savoir plus sur KOOP Market\n3. 💼 Emploi : Besoin d'un travail ?\n4. 🎓 Formation : Découvrir nos programmes\n5. 🛒 Boutique : Accéder à la boutique KOOP\n6. ✉️ Message particulier : Parler à un conseiller`;
 
@@ -28,7 +28,7 @@ const RESPONSES = {
     text: `Accédez à la boutique KOOP pour voir nos articles et services : https://koop-market.com/#/koop`
   },
   '6': {
-    text: `Votre message sera transmis à un conseiller KOOP Market. Veuillez décrire votre demande ci-dessous ou écrivez directement à : coop@amino.com`
+    text: `Votre message sera transmis à un conseiller KOOP Market. Veuillez décrire votre demande ci-dessous ou écrivez directement à : contact@koop-market.com`
   }
 };
 
