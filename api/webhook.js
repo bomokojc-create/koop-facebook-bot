@@ -7,9 +7,9 @@
 const VERIFY_TOKEN = process.env.VERIFY_TOKEN || 'koop_verify_token_2026';
 const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
 
-// ─── Menu Options ────────────────────────────────────────────────────────────────────
+// ─── Menu Options ───────────────────────────────────────────────────────────────────
 
-const MENU_TEXT = `Bonjour ! Bienvenue chez KOOP Market. Comment pouvons-nous vous aider aujourd'hui ?\n\n1. 📢 Chaîne WhatsApp : Rejoindre notre communauté\n2. ℹ️ Infos : En savoir plus sur KOOP Market\n3. 💼 Emploi : Besoin d'un travail ?\n4. 🎓 Formation : Découvrir nos programmes\n5. 🛒 Boutique : Accéder à la boutique KOOP\n6. ✉️ Message particulier : Parler à un conseiller`;
+const MENU_TEXT = `Veuillez choisir une option en tapant le numéro correspondant :\n\n1. 📢 Chaîne WhatsApp : Rejoindre notre communauté\n2. ℹ️ Infos : En savoir plus sur KOOP Market\n3. 💼 Emploi : Besoin d'un travail ?\n4. 🎓 Formation : Découvrir nos programmes\n5. 🛒 Boutique : Accéder à la boutique KOOP\n6. ✉️ Message particulier : Nous contacter par e-mail`;
 
 const RESPONSES = {
   '1': {
@@ -23,17 +23,16 @@ const RESPONSES = {
   },
   '4': {
     text: `Découvrez nos formations et certifications : https://koop-market.com/#/services/training`
-  },
+        },
   '5': {
     text: `Accédez à la boutique KOOP pour voir nos articles et services : https://koop-market.com/#/koop`
   },
   '6': {
-    text: `Votre message sera transmis à un conseiller KOOP Market. Veuillez décrire votre demande ci-dessous ou écrivez directement à : contact@koop-market.com`
+    text: `Pour toute demande particulière, veuillez nous écrire directement à l'adresse suivante : contact@koop-market.com`
   }
 };
 
-// ─── Helpers ───────────────────────────────────────────────────────────────────────
-
+// ─── Helpers ────────────────────────────────────────────────────────────────────
 function parseChoice(text) {
   const trimmed = text.trim().toLowerCase();
   
@@ -90,7 +89,7 @@ async function handleMessage(senderId, messageText) {
   if (choice && RESPONSES[choice]) {
     await sendMessage(senderId, RESPONSES[choice].text);
   } else {
-    await sendMessage(senderId, `Message reçu ! Un conseiller KOOP Market vous répondra bientôt.\n\nTapez "menu" pour voir les options disponibles.`);
+    await sendMessage(senderId, `Message reçu ! Tapez "menu" pour voir les options disponibles.`);
   }
 }
 
