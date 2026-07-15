@@ -34,8 +34,8 @@ const RESPONSES = {
 
 // ─── Concluding / Politeness Keywords ───────────────────────────────────────────────
 const CONCLUDING_KEYWORDS = [
-  'merci', 'thanks', 'thank you', 'ok', 'okay',
-  "d'accord", 'daccord', 'bien reçu', 'reçu', 'received'
+  'merci', 'merci beaucoup', 'thanks', 'thank you', 'ok', 'okay',
+  "d'accord", 'daccord', 'bien reçu', 'reçu', 'received', 'dkr'
 ];
 
 const POLITE_EXIT_REPLY = 'Je vous en prie ! KOOP Market reste à votre disposition.';
