@@ -7,7 +7,7 @@
 const VERIFY_TOKEN = process.env.VERIFY_TOKEN || 'koop_verify_token_2026';
 const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
 
-// ─── Menu Options ───────────────────────────────────────────────────────────────────
+// ─── Menu Options ──────────────────────────────────────────────────────────────────
 
 const MENU_TEXT = `Veuillez choisir une option en tapant le numéro correspondant :\n\n1. 📢 Chaîne WhatsApp : Rejoindre notre communauté\n2. ℹ️ Infos : En savoir plus sur KOOP Market\n3. 💼 Emploi : Besoin d'un travail ?\n4. 🎓 Formation : Découvrir nos programmes\n5. 🛒 Boutique : Accéder à la boutique KOOP\n6. ✉️ Message particulier : Nous contacter par e-mail`;
 
@@ -32,28 +32,24 @@ const RESPONSES = {
   }
 };
 
+// ─── Concluding / Politeness Keywords ───────────────────────────────────────────────
+const CONCLUDING_KEYWORDS = [
+  'merci', 'thanks', 'thank you', 'ok', 'okay',
+  "d'accord", 'daccord', 'bien reçu', 'reçu', 'received'
+];
+
+const POLITE_EXIT_REPLY = 'Je vous en prie ! KOOP Market reste à votre disposition.';
+
 // ─── Helpers ────────────────────────────────────────────────────────────────────
-function parseChoice(text) {
-  const trimmed = text.trim().toLowerCase();
-  
-  // Direct number match
-  if (['1', '2', '3', '4', '5', '6'].includes(trimmed)) return trimmed;
-  
-  // Keyword matching
-  const keywords = {
-    'chaine': '1', 'chaîne': '1', 'chain': '1', 'whatsapp': '1', 'communauté': '1', 'communaute': '1',
-    'infos': '2', 'info': '2', 'about': '2',
-    'emploi': '3', 'job': '3', 'jobs': '3', 'travail': '3',
-    'formation': '4', 'training': '4', 'cours': '4', 'course': '4',
-    'boutique': '5', 'shop': '5', 'magasin': '5',
-    'message': '6', 'conseiller': '6', 'contact': '6', 'help': '6'
-  };
-  
-  for (const [keyword, choice] of Object.entries(keywords)) {
-    if (trimmed.includes(keyword)) return choice;
-  }
-  
-  return null;
+
+function isConcludingMessage(text) {
+  const normalized = text.trim().toLowerCase();
+  return CONCLUDING_KEYWORDS.some(kw => normalized === kw);
+}
+
+function isMenuChoice(text) {
+  const trimmed = text.trim();
+  return ['1', '2', '3', '4', '5', '6'].includes(trimmed) ? trimmed : null;
 }
 
 async function sendMessage(recipientId, text) {
@@ -77,20 +73,21 @@ async function sendMessage(recipientId, text) {
 async function handleMessage(senderId, messageText) {
   const text = messageText || '';
   
-  // Show menu on greeting or "menu" command
-  const menuTriggers = ['menu', 'start', 'hi', 'hello', 'bonjour', 'salut', 'hey', 'bonsoir'];
-  if (menuTriggers.some(t => text.trim().toLowerCase() === t) || text.trim() === '') {
-    await sendMessage(senderId, MENU_TEXT);
+  // 1. Check concluding/politeness keywords
+  if (isConcludingMessage(text)) {
+    await sendMessage(senderId, POLITE_EXIT_REPLY);
     return;
   }
-  
-  // Parse user choice
-  const choice = parseChoice(text);
+
+  // 2. Check if it's a menu number (1-6)
+  const choice = isMenuChoice(text);
   if (choice && RESPONSES[choice]) {
     await sendMessage(senderId, RESPONSES[choice].text);
-  } else {
-    await sendMessage(senderId, `Message reçu ! Tapez "menu" pour voir les options disponibles.`);
+    return;
   }
+
+  // 3. Fallback: send the full menu directly
+  await sendMessage(senderId, MENU_TEXT);
 }
 
 module.exports = async function handler(req, res) {
@@ -131,7 +128,10 @@ module.exports = async function handler(req, res) {
   return res.status(405).send('Method Not Allowed');
 };
 
-module.exports.parseChoice = parseChoice;
+module.exports.isConcludingMessage = isConcludingMessage;
+module.exports.isMenuChoice = isMenuChoice;
 module.exports.handleMessage = handleMessage;
 module.exports.MENU_TEXT = MENU_TEXT;
 module.exports.RESPONSES = RESPONSES;
+module.exports.CONCLUDING_KEYWORDS = CONCLUDING_KEYWORDS;
+module.exports.POLITE_EXIT_REPLY = POLITE_EXIT_REPLY;
