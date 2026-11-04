@@ -9,7 +9,33 @@ const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
 
 // ─── Menu Options ──────────────────────────────────────────────────────────────────
 
-const MENU_TEXT = `Veuillez choisir une option en tapant le numéro correspondant :\n\n1. 📢 Chaîne WhatsApp : Rejoindre notre communauté\n2. ℹ️ Infos : En savoir plus sur KOOP Market\n3. 💼 Emploi : Besoin d'un travail ?\n4. 🎓 Formation : Découvrir nos programmes\n5. 🛒 Boutique : Accéder à la boutique KOOP\n6. ✉️ Message particulier : Nous contacter par e-mail`;
+const MENU_TEXT = `Bonjour et merci pour votre message. Voici nos liens principaux :
+
+📢 Pour rejoindre notre chaîne WhatsApp et recevoir les opportunités d'EMPLOI en priorité :
+https://whatsapp.com/channel/0029Vb7vn4J8fewxV924lW1p
+
+🌐 Pour visiter le site KOOP Market :
+https://koop-market.com
+
+🎓 Pour voir les bourses d'études :
+https://koop-market.com/#/scholarships
+
+📰 Pour publier un article :
+https://koop-market.com/#/articles
+
+💼 Pour voir les offres d'emploi général :
+https://koop-market.com/#/jobs
+
+📚 Pour voir les formations et certifications :
+https://koop-market.com/#/training
+
+🛒 Pour accéder à la boutique KOOP :
+https://koop-market.com/#/koop
+
+✉️ Pour une demande particulière :
+contact@koop-market.com
+
+⚠️ Notez bien : nous ne donnons pas de travail, nous n'engageons pas, nous ne recrutons pas, mais nous partageons seulement des opportunités d'emploi.`;
 
 const RESPONSES = {
   '1': {
@@ -40,6 +66,66 @@ const CONCLUDING_KEYWORDS = [
 
 const POLITE_EXIT_REPLY = 'Je vous en prie ! KOOP Market reste à votre disposition.';
 
+
+// ─── Réponses automatiques par mots clés (sans IA) ──────────────────────────────────
+
+const WHATSAPP_LINK = 'https://whatsapp.com/channel/0029Vb7vn4J8fewxV924lW1p';
+
+const REPLY_HIRE = `Bonjour, je comprends tout à fait votre difficulté. Malheureusement, je ne suis pas recruteur : je recherche et partage des offres d'emploi pour aider notre communauté. Grâce à ces publications, plus de 100 jeunes ont déjà trouvé du travail. ✅
+
+Pour consulter les opportunités, rejoignez notre chaîne WhatsApp :
+${WHATSAPP_LINK} 📲`;
+
+const REPLY_OPPORTUNITIES = `Bonjour, je ne connais pas nécessairement toutes les opportunités d'emploi disponibles. Le mieux est de consulter régulièrement la liste que nous publions sur notre chaîne WhatsApp 👉🏽
+${WHATSAPP_LINK}`;
+
+const REPLY_SCHOLARSHIP_HELP = `Bonjour, merci pour votre confiance. Je comprends votre démarche, et j'ai vraiment à cœur d'aider les jeunes Congolais à accéder aux études.
+
+Je préfère être honnête avec vous : KOOP Market n'a pas encore de service d'accompagnement personnalisé pour les dossiers de bourse. Accompagner un dossier ne veut pas dire que la bourse est garantie, et je ne veux créer aucune fausse attente.
+
+Ce que nous faisons déjà :
+✅ Nous publions des bourses d'études : https://koop-market.com/#/scholarships
+✅ Nous partageons des formations : https://koop-market.com/#/training
+✅ Nous annonçons chaque nouvelle opportunité sur notre chaîne WhatsApp : ${WHATSAPP_LINK}
+
+Nous travaillons à définir un processus d'accompagnement clair. Dès qu'il sera prêt, je ferai une vidéo pour l'annoncer. D'ici là, suivez nos publications et préparez vos documents : CV, relevés de notes, lettre de motivation et passeport. 🙏🏽`;
+
+function normalize(text) {
+  return text
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[’‘`´]/g, "'")
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function detectIntent(text) {
+  const t = normalize(text);
+  const test = (re) => re.test(t);
+
+  // 1. Accompagnement pour une bourse (le mot bourse + une demande d'aide)
+  if (t.includes('bourse') &&
+      test(/accompagn|m'aider|aidez|\baide\b|dossier|candidature|postuler|suivi/)) {
+    return 'SCHOLARSHIP_HELP';
+  }
+  // 2. Demande à être engagé
+  if (test(/recrut|embauch|engag|cherche (un |du )?(emploi|travail)|besoin (d'un |de |d')?(emploi|travail)|veux (un )?(emploi|travail)|veux travailler|donn\w* moi (un )?(travail|emploi)|me prendre/)) {
+    return 'HIRE';
+  }
+  // 3. Demande d'opportunités disponibles
+  if (test(/opportunite|\boffres?\b|disponible|\bpostes?\b|y a[- ]t[- ]il/)) {
+    return 'OPPORTUNITIES';
+  }
+  return null;
+}
+
+const INTENT_REPLIES = {
+  HIRE: REPLY_HIRE,
+  OPPORTUNITIES: REPLY_OPPORTUNITIES,
+  SCHOLARSHIP_HELP: REPLY_SCHOLARSHIP_HELP
+};
+
 // ─── Helpers ────────────────────────────────────────────────────────────────────
 
 function isConcludingMessage(text) {
@@ -49,7 +135,7 @@ function isConcludingMessage(text) {
 
 function isMenuChoice(text) {
   const trimmed = text.trim();
-  return ['1', '2', '3', '4', '5', '6'].includes(trimmed) ? trimmed : null;
+  return null; // menu à liens directs: plus de choix par numéro
 }
 
 async function sendMessage(recipientId, text) {
@@ -79,10 +165,10 @@ async function handleMessage(senderId, messageText) {
     return;
   }
 
-  // 2. Check if it's a menu number (1-6)
-  const choice = isMenuChoice(text);
-  if (choice && RESPONSES[choice]) {
-    await sendMessage(senderId, RESPONSES[choice].text);
+  // 2. Réponses automatiques par mots clés
+  const intent = detectIntent(text);
+  if (intent && INTENT_REPLIES[intent]) {
+    await sendMessage(senderId, INTENT_REPLIES[intent]);
     return;
   }
 
@@ -130,6 +216,8 @@ module.exports = async function handler(req, res) {
 
 module.exports.isConcludingMessage = isConcludingMessage;
 module.exports.isMenuChoice = isMenuChoice;
+module.exports.detectIntent = detectIntent;
+module.exports.INTENT_REPLIES = INTENT_REPLIES;
 module.exports.handleMessage = handleMessage;
 module.exports.MENU_TEXT = MENU_TEXT;
 module.exports.RESPONSES = RESPONSES;
