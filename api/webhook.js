@@ -126,6 +126,45 @@ const INTENT_REPLIES = {
   SCHOLARSHIP_HELP: REPLY_SCHOLARSHIP_HELP
 };
 
+
+// ─── Menu puis note de l'assistant, chacun une seule fois par conversation ──────────
+// Vercel est sans mémoire entre deux messages: on lit l'historique de la conversation
+// sur Facebook pour savoir ce qui a déjà été envoyé.
+const MENU_MARKER = 'Voici nos liens principaux';
+const NOTE_MARKER = "assistant IA du professeur Kerryl Musungu";
+const COOLDOWN_MS = 24 * 60 * 60 * 1000;
+const localState = new Map(); // filet de sécurité si l'API de l'historique échoue
+
+const ASSISTANT_NOTE = `Bonjour, je suis l'assistant IA du professeur Kerryl Musungu. 🤖
+
+La grande majorité de vos questions trouvent leur réponse dans les options que je vous ai envoyées plus haut. Merci de les consulter en premier.
+
+Si vous avez une question particulière, merci de patienter : le professeur vous répondra dès que possible. 🙏🏽`;
+
+async function getConversationState(senderId) {
+  try {
+    const url = `https://graph.facebook.com/v19.0/me/conversations?platform=messenger&user_id=${encodeURIComponent(senderId)}&fields=messages.limit(25){from,message,created_time}&access_token=${PAGE_ACCESS_TOKEN}`;
+    const res = await fetch(url);
+    const data = await res.json();
+    if (data.error) throw new Error(data.error.message);
+    const messages = (data.data && data.data[0] && data.data[0].messages && data.data[0].messages.data) || [];
+    const now = Date.now();
+    const fromPage = messages.filter(m =>
+      m.message && m.from && String(m.from.id) !== String(senderId) &&
+      (now - new Date(m.created_time).getTime()) < COOLDOWN_MS
+    );
+    return {
+      menuSent: fromPage.some(m => m.message.includes(MENU_MARKER)),
+      noteSent: fromPage.some(m => m.message.includes(NOTE_MARKER))
+    };
+  } catch (err) {
+    console.error('getConversationState error:', err.message);
+    const s = localState.get(senderId);
+    if (s && Date.now() - s.at < COOLDOWN_MS) return { menuSent: s.menuSent, noteSent: s.noteSent };
+    return { menuSent: false, noteSent: false };
+  }
+}
+
 // ─── Helpers ────────────────────────────────────────────────────────────────────
 
 function isConcludingMessage(text) {
@@ -172,8 +211,19 @@ async function handleMessage(senderId, messageText) {
     return;
   }
 
-  // 3. Fallback: send the full menu directly
-  await sendMessage(senderId, MENU_TEXT);
+  // 3. Repli: 1er message = menu complet, 2e message = note de l'assistant, ensuite silence
+  const state = await getConversationState(senderId);
+  if (!state.menuSent) {
+    localState.set(senderId, { menuSent: true, noteSent: false, at: Date.now() });
+    await sendMessage(senderId, MENU_TEXT);
+    return;
+  }
+  if (!state.noteSent) {
+    localState.set(senderId, { menuSent: true, noteSent: true, at: Date.now() });
+    await sendMessage(senderId, ASSISTANT_NOTE);
+    return;
+  }
+  // menu et note déjà envoyés: on ne répète rien
 }
 
 module.exports = async function handler(req, res) {
@@ -219,6 +269,8 @@ module.exports.isMenuChoice = isMenuChoice;
 module.exports.detectIntent = detectIntent;
 module.exports.INTENT_REPLIES = INTENT_REPLIES;
 module.exports.handleMessage = handleMessage;
+module.exports.getConversationState = getConversationState;
+module.exports.ASSISTANT_NOTE = ASSISTANT_NOTE;
 module.exports.MENU_TEXT = MENU_TEXT;
 module.exports.RESPONSES = RESPONSES;
 module.exports.CONCLUDING_KEYWORDS = CONCLUDING_KEYWORDS;
