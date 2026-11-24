@@ -71,9 +71,9 @@ const POLITE_EXIT_REPLY = 'Je vous en prie ! KOOP Market reste à votre disposit
 
 const WHATSAPP_LINK = 'https://whatsapp.com/channel/0029Vb7vn4J8fewxV924lW1p';
 
-const REPLY_HIRE = `Bonjour, je comprends tout à fait votre difficulté. Malheureusement, je ne suis pas recruteur : je recherche et partage des offres d'emploi pour aider notre communauté. Grâce à ces publications, plus de 100 jeunes ont déjà trouvé du travail. ✅
+const REPLY_HIRE = `Bonjour, je ne donne pas de travail, mais je partage des opportunités d'emploi. ✅
 
-Pour consulter les opportunités, rejoignez notre chaîne WhatsApp :
+Pour les recevoir en priorité, rejoignez notre chaîne WhatsApp :
 ${WHATSAPP_LINK} 📲`;
 
 const REPLY_OPPORTUNITIES = `Bonjour, je ne connais pas nécessairement toutes les opportunités d'emploi disponibles. Le mieux est de consulter régulièrement la liste que nous publions sur notre chaîne WhatsApp 👉🏽
@@ -109,8 +109,8 @@ function detectIntent(text) {
       test(/accompagn|m'aider|aidez|\baide\b|dossier|candidature|postuler|suivi/)) {
     return 'SCHOLARSHIP_HELP';
   }
-  // 2. Demande à être engagé
-  if (test(/recrut|embauch|engag|cherche (un |du )?(emploi|travail)|besoin (d'un |de |d')?(emploi|travail)|veux (un )?(emploi|travail)|veux travailler|donn\w* moi (un )?(travail|emploi)|me prendre/)) {
+  // 2. Toute mention d'emploi / travail (français + lingala)
+  if (test(/travail|emploi|boulot|\bjobs?\b|misala|mosala|msala|recrut|embauch|engag|me prendre/)) {
     return 'HIRE';
   }
   // 3. Demande d'opportunités disponibles
